@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment
 import me.tsukanov.counter.CounterApplication
 import me.tsukanov.counter.R
 import me.tsukanov.counter.activities.MainActivity
+import me.tsukanov.counter.domain.CounterEvent
 import me.tsukanov.counter.domain.IntegerCounter
 import me.tsukanov.counter.domain.IntegerCounter.Companion.valueCharLimit
 import me.tsukanov.counter.infrastructure.BroadcastHelper
@@ -78,7 +79,7 @@ class AddDialog : DialogFragment() {
     }
 
     private fun addCounter(counter: IntegerCounter) {
-        CounterApplication.component!!.localStorage()!!.write(counter)
+        CounterApplication.component!!.localStorage()!!.write(counter, CounterEvent.CREATED)
         BroadcastHelper(requireContext()).sendSelectCounterBroadcast(counter.name)
     }
 

@@ -1,6 +1,8 @@
 package me.tsukanov.counter.repository
 
+import me.tsukanov.counter.domain.CounterEvent
 import me.tsukanov.counter.repository.exceptions.MissingCounterException
+import me.tsukanov.counter.repository.exceptions.UnsupportedExportVersionException
 import java.io.IOException
 
 interface CounterStorage<T> {
@@ -20,9 +22,9 @@ interface CounterStorage<T> {
 
     /**
      * Saves provided counter in storage. If it's identifier is already defined, existing counter will
-     * be overwritten.
+     * be overwritten. The provided [event] is appended to the counter's change history.
      */
-    fun write(counter: T)
+    fun write(counter: T, event: CounterEvent)
 
     /**
      * Writes provided counters into storage.
@@ -41,4 +43,12 @@ interface CounterStorage<T> {
     /** Exports all counters into CSV formatted string.  */
     @Throws(IOException::class)
     fun toCsv(): String
+
+    /**
+     * Imports counters and their history from a previously produced CSV export.
+     *
+     * Replaces the current storage contents on success.
+     */
+    @Throws(IOException::class, UnsupportedExportVersionException::class)
+    fun fromCsv(content: String)
 }

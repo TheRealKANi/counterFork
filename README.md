@@ -1,3 +1,26 @@
+# Counter (fork)
+
+This is a personal fork of [gentlecat/counter](https://github.com/gentlecat/counter) — a simple Android tally counter app. The upstream project is no longer actively maintained; this fork experiments with additional features on top of it.
+
+> [!NOTE]
+> The changes in this fork were implemented with [Claude Code](https://claude.com/claude-code) (Opus 4.7) under direction from the fork maintainer.
+
+## Changes in this fork
+
+- **Per-counter change history.** Every update (`CREATED`, `INCREMENT`, `DECREMENT`, `RESET`, `EDITED`, `DELETED`) is recorded with its timestamp and the resulting value. History is kept in a separate SharedPreferences file alongside the existing counter values.
+- **Versioned CSV export (v2).** Export now produces a self-describing file with a `# Version: 2` header and per-counter blocks:
+  - `[Counter]` — current name, value, and last-update timestamp.
+  - `[History]` — every recorded event for that counter.
+- **CSV import.** Settings → "Import counters" opens a file picker (Storage Access Framework) and restores counters and their history from a v2 export. Unknown versions are rejected with a clear toast.
+- **Legacy data bootstrap.** Counters that existed before the upgrade get a synthetic `CREATED` event derived from their existing last-update timestamp, so the history is non-empty from day one.
+- **Manual GitHub Actions trigger.** The Android CI workflow now supports `workflow_dispatch`, and manual runs upload the debug APK as a build artifact.
+
+The change history is not exposed in the in-app UI — it surfaces only through the CSV export, which keeps the original UX unchanged.
+
+---
+
+# Original README
+
 # Counter
 
 Simple [tally counter](https://en.wikipedia.org/wiki/Tally_counter) for Android. It makes counting easier! You can have multiple counters with their own names and values. Values can be changed using the volume buttons or by tapping on the screen. All your data can be exported in CSV format.

@@ -8,20 +8,33 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import me.tsukanov.counter.CounterApplication
 import me.tsukanov.counter.R
 import me.tsukanov.counter.SharedPrefKeys
+import me.tsukanov.counter.repository.exceptions.UnsupportedExportVersionException
 import me.tsukanov.counter.view.Themes.Companion.getCurrent
 import org.apache.commons.lang3.StringUtils
 import java.io.IOException
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
+    private lateinit var importLauncher: ActivityResultLauncher<Array<String>>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        importLauncher = registerForActivityResult(
+            ActivityResultContracts.OpenDocument()
+        ) { uri: Uri? ->
+            if (uri != null) {
+                handleImport(uri)
+            }
+        }
 
         try {
 
@@ -39,6 +52,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 onRemoveCountersClickListener
             findPreference<Preference>(KEY_EXPORT_COUNTERS)!!.onPreferenceClickListener =
                 onExportClickListener
+            findPreference<Preference>(KEY_IMPORT_COUNTERS)!!.onPreferenceClickListener =
+                onImportClickListener
 
             findPreference<Preference>(KEY_HOMEPAGE)!!.onPreferenceClickListener =
                 Preference.OnPreferenceClickListener { p: Preference? ->
@@ -113,6 +128,43 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+    private val onImportClickListener: Preference.OnPreferenceClickListener
+        get() = Preference.OnPreferenceClickListener { preference: Preference? ->
+            importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain", "*/*"))
+            true
+        }
+
+    private fun handleImport(uri: Uri) {
+        try {
+            val content = requireContext().contentResolver.openInputStream(uri)
+                ?.bufferedReader()
+                ?.use { it.readText() }
+                ?: throw IOException("Unable to read selected file")
+
+            CounterApplication.component!!.localStorage()!!.fromCsv(content)
+
+            Toast.makeText(
+                this.activity,
+                resources.getText(R.string.toast_import_success),
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (e: UnsupportedExportVersionException) {
+            Log.w(TAG, "Import rejected: unsupported export version", e)
+            Toast.makeText(
+                this.activity,
+                resources.getText(R.string.toast_import_unsupported_version),
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error occurred while importing counters", e)
+            Toast.makeText(
+                this.activity,
+                resources.getText(R.string.toast_import_failed),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     private fun showWipeDialog() {
         val builder = AlertDialog.Builder(this.activity)
         builder.setMessage(R.string.settings_wipe_confirmation)
@@ -157,6 +209,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         const val KEY_REMOVE_COUNTERS: String = "removeCounters"
         const val KEY_EXPORT_COUNTERS: String = "exportCounters"
+        const val KEY_IMPORT_COUNTERS: String = "importCounters"
         const val KEY_HOMEPAGE: String = "homepage"
         const val KEY_TIP: String = "tip"
         const val KEY_VERSION: String = "version"

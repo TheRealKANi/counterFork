@@ -55,6 +55,8 @@
   <string name="settings_wipe_title">Remove all counters</string>
   <string name="settings_export_title">Export counters</string>
   <string name="settings_export_summary">Export all counters in CSV format</string>
+  <string name="settings_import_title">Import counters</string>
+  <string name="settings_import_summary">Replace all counters from a previously exported CSV</string>
   <string name="settings_tip_title">Buy me a coffee</string>
   <string name="settings_tip_summary">Support the creator of this app</string>
   <string name="settings_homepage_title">Homepage</string>
@@ -67,6 +69,9 @@
   <string name="toast_delete_success">Counter \"{name}\" has been deleted.</string>
   <string name="toast_unable_to_modify">Something went wrong while updating the counter. Sorry!</string>
   <string name="toast_unable_to_export">Something went wrong while exporting the counters. Sorry!</string>
+  <string name="toast_import_success">Counters imported successfully.</string>
+  <string name="toast_import_unsupported_version">This export uses an unsupported format version.</string>
+  <string name="toast_import_failed">Something went wrong while importing the counters. Sorry!</string>
   <string name="toast_tutorial">Try clicking on the number!</string>
 
   <!-- Other stuff -->

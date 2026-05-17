@@ -15,6 +15,7 @@ import androidx.fragment.app.DialogFragment
 import me.tsukanov.counter.CounterApplication
 import me.tsukanov.counter.R
 import me.tsukanov.counter.activities.MainActivity
+import me.tsukanov.counter.domain.CounterEvent
 import me.tsukanov.counter.domain.IntegerCounter
 import me.tsukanov.counter.domain.IntegerCounter.Companion.valueCharLimit
 import me.tsukanov.counter.infrastructure.BroadcastHelper
@@ -75,8 +76,18 @@ class EditDialog : DialogFragment() {
 
                     val storage = CounterApplication.component!!.localStorage()
 
-                    storage!!.delete(oldName!!)
-                    storage!!.write(IntegerCounter(newName!!, newValue, DateTime()))
+                    if (newName == oldName) {
+                        storage!!.write(
+                            IntegerCounter(newName!!, newValue, DateTime()),
+                            CounterEvent.EDITED
+                        )
+                    } else {
+                        storage!!.delete(oldName!!)
+                        storage.write(
+                            IntegerCounter(newName!!, newValue, DateTime()),
+                            CounterEvent.CREATED
+                        )
+                    }
 
                     BroadcastHelper(requireContext()).sendSelectCounterBroadcast(newName)
                 }

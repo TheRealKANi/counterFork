@@ -24,6 +24,7 @@ import androidx.preference.PreferenceManager
 import me.tsukanov.counter.CounterApplication
 import me.tsukanov.counter.R
 import me.tsukanov.counter.SharedPrefKeys
+import me.tsukanov.counter.domain.CounterEvent
 import me.tsukanov.counter.domain.IntegerCounter
 import me.tsukanov.counter.repository.exceptions.MissingCounterException
 import me.tsukanov.counter.view.dialogs.DeleteDialog
@@ -225,7 +226,7 @@ class CounterFragment : Fragment() {
         playSound(incrementSoundPlayer!!)
 
         updateInterface()
-        saveValue()
+        saveValue(CounterEvent.INCREMENT)
     }
 
     private fun decrement() {
@@ -234,7 +235,7 @@ class CounterFragment : Fragment() {
         playSound(decrementSoundPlayer!!)
 
         updateInterface()
-        saveValue()
+        saveValue(CounterEvent.DECREMENT)
     }
 
     private fun reset() {
@@ -246,7 +247,7 @@ class CounterFragment : Fragment() {
         }
 
         updateInterface()
-        saveValue()
+        saveValue(CounterEvent.RESET)
     }
 
     /** Updates UI elements of the fragment based on current value of the counter.  */
@@ -276,9 +277,9 @@ class CounterFragment : Fragment() {
         }
     }
 
-    private fun saveValue() {
+    private fun saveValue(event: CounterEvent) {
         val storage = CounterApplication.component!!.localStorage()
-        storage!!.write(counter)
+        storage!!.write(counter!!, event)
     }
 
     /** Triggers vibration for a specified duration, if vibration is turned on.  */
